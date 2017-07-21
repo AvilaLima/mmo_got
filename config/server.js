@@ -35,12 +35,15 @@ app.use(expressValidator());
 /* configura o middleware helmet */
 app.use(helmet());
 
+
 /* configura o middleware express-session */
 app.use(expressSession( {
 	secret: 'Da3nery$',
 	resave: false,
-	saveUninitialized: false
+	saveUninitialized: false,
+	cookie:{maxAge:600000}
 }));
+
 
 /* efetua o autoload das rotas, dos models e dos controllers para o objeto app */
 consign()

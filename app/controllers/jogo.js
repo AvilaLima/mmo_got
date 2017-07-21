@@ -11,19 +11,17 @@ module.exports.index = function (application, req, res)
 
         var JogoDAO = new application.app.models.JogoDAO(connection);
 
-        var comando_invalido = 'N';
+        var msg = '';
 
-        if(req.query.comando_invalido == 'S')
+        if(req.query.msg != '')
         {
-            comando_invalido = 'S';
+            msg = req.query.msg;
         }
-
-        JogoDAO.iniciaJogo(usuario, casa,comando_invalido, function(jogo){
-            console.log(jogo);
+        JogoDAO.iniciaJogo(usuario, casa,msg, function(jogo){
             res.render('jogo', {
                 img_casa: casa,
                 jogo: jogo,
-                comando_invalido:comando_invalido
+                msg:msg
             });
         })
 
@@ -50,7 +48,15 @@ module.exports.suditos = function (application, req, res)
 
 module.exports.pergaminhos = function (application, req, res)
 {
-    res.render("pergaminhos", {validacao:{}});
+    /*recuperar as ações inseridas no banco de dados */    
+    var connection = application.config.dbConnection;
+
+    var JogoDAO = new application.app.models.JogoDAO(connection);
+
+    var usuario = req.session.usuario;
+
+    JogoDAO.getAcoes(usuario, res);
+    
 }
 
 module.exports.ordernar_acao_sudito = function(application,req,res)
@@ -62,12 +68,19 @@ module.exports.ordernar_acao_sudito = function(application,req,res)
     req.assert('quantidade', 'Quantidade deve ser informada.').notEmpty();
     
     var erros = req.validationErrors();
-
+    console.log(erros);    
     if(erros)
     {
-        res.redirect('jogo?comando_invalido=S');
+        res.redirect('jogo?msg=E');
         return;
     }
+    var connection = application.config.dbConnection;  
+    
+    var JogoDAO = new application.app.models.JogoDAO(connection);
+    
+    dadosForm.usuario = req.session.usuario;
 
-    res.send("Tudo OK");
+    JogoDAO.acao(dadosForm);
+
+    res.redirect('jogo?msg=S')
 }
