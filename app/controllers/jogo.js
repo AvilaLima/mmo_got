@@ -68,7 +68,6 @@ module.exports.ordernar_acao_sudito = function(application,req,res)
     req.assert('quantidade', 'Quantidade deve ser informada.').notEmpty();
     
     var erros = req.validationErrors();
-    console.log(erros);    
     if(erros)
     {
         res.redirect('jogo?msg=E');

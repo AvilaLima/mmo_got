@@ -1,3 +1,6 @@
+/* importar o módulo do crypto */
+var crypto = require("crypto");
+
 function UsuariosDAO(connection)
 {    
 	this._connection = connection();//o _ é uma convenção que indica que a variável só deve ser usada dentro do módulo.
@@ -13,11 +16,12 @@ UsuariosDAO.prototype.inserirUsuario = function (usuario,req,res)
                 console.log(usuario);
                if(result.length== 0)
                {
-                   console.log("entrou para inserir");
-                    collection.insert(usuario);
-                    var sucesso =  [{param:'', msg:"Usuário cadastrado com sucesso", value:''}];
-                    res.render("index", {validacao:sucesso});
-                    mongoclient.close();    
+                   usuario.senha = crypto.createHash("md5").update(usuario.senha).digest("hex");
+
+                   collection.insert(usuario);
+                   var sucesso =  [{param:'', msg:"Usuário cadastrado com sucesso", value:''}];
+                   res.render("index", {validacao:sucesso});
+                   mongoclient.close();    
                } 
                 else
                 {
@@ -36,6 +40,7 @@ UsuariosDAO.prototype.autenticar = function (usuario,req,res)
         {
             //usuario: usuario.usuario e  usuario: $eq: usuario.usuario SÃO AS MESMA COISA
             //collection.find({usuario: usuario.usuario},senha: {$eq: usuario.senha}});
+            usuario.senha = crypto.createHash("md5").update(usuario.senha).digest("hex");        
             collection.find(usuario).toArray(function(error, result)
             {
                if(result[0] != undefined)
